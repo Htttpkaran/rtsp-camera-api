@@ -11,9 +11,16 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerDocument } from './config/swagger.js';
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy (Nginx)
 
-// Security headers
-app.use(helmet());
+// Clear any previously cached security headers in the browser (like HSTS) that force HTTPS
+app.use((req, res, next) => {
+  res.setHeader('Strict-Transport-Security', 'max-age=0');
+  res.removeHeader('Content-Security-Policy');
+  res.removeHeader('Cross-Origin-Opener-Policy');
+  res.removeHeader('Cross-Origin-Embedder-Policy');
+  next();
+});
 
 // Enable CORS
 app.use(cors());
