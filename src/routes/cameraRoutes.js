@@ -3,13 +3,11 @@ import {
   createCamera,
   getAllCameras,
   getCamera,
-  updateCamera,
   deleteCamera,
   getCameraStatus
 } from '../controllers/cameraController.js';
 import {
   cameraBodySchema,
-  cameraUpdateBodySchema,
   cameraNameParamSchema,
   validateBody,
   validateParams
@@ -17,7 +15,7 @@ import {
 
 const router = Router();
 
-// Create Camera
+// Create / Update Camera (upsert)
 router.post(
   '/',
   validateBody(cameraBodySchema),
@@ -35,14 +33,6 @@ router.get(
   '/:cameraName',
   validateParams(cameraNameParamSchema),
   getCamera
-);
-
-// Update Camera
-router.put(
-  '/:cameraName',
-  validateParams(cameraNameParamSchema),
-  validateBody(cameraUpdateBodySchema),
-  updateCamera
 );
 
 // Delete Camera

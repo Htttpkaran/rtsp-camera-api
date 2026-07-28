@@ -1,5 +1,5 @@
 import MediaMTXService from '../services/MediaMTXService.js';
-import { ConflictError, NotFoundError } from '../utils/errors.js';
+import { NotFoundError } from '../utils/errors.js';
 import { config } from '../config/index.js';
 import logger from '../utils/logger.js';
 
@@ -16,7 +16,7 @@ export const createCamera = async (req, res, next) => {
   try {
     const { cameraName, rtspUrl } = req.body;
 
-    // Check if camera already exists in configuration
+    // Upsert: update if exists, create if not
     let exists = false;
     try {
       await MediaMTXService.getPath(cameraName);
@@ -28,12 +28,12 @@ export const createCamera = async (req, res, next) => {
     }
 
     if (exists) {
-      throw new ConflictError(`Camera '${cameraName}' already exists`);
+      await MediaMTXService.updatePath(cameraName, rtspUrl);
+    } else {
+      await MediaMTXService.createPath(cameraName, rtspUrl);
     }
 
-    await MediaMTXService.createPath(cameraName, rtspUrl);
-    
-    return res.status(201).json({
+    return res.status(exists ? 200 : 201).json({
       success: true,
       camera: mapCamera(cameraName, rtspUrl)
     });
@@ -70,24 +70,6 @@ export const getCamera = async (req, res, next) => {
   }
 };
 
-export const updateCamera = async (req, res, next) => {
-  try {
-    const { cameraName } = req.params;
-    const { rtspUrl } = req.body;
-
-    // Verify the camera exists first
-    await MediaMTXService.getPath(cameraName);
-
-    await MediaMTXService.updatePath(cameraName, rtspUrl);
-
-    return res.status(200).json({
-      success: true,
-      camera: mapCamera(cameraName, rtspUrl)
-    });
-  } catch (err) {
-    next(err);
-  }
-};
 
 export const deleteCamera = async (req, res, next) => {
   try {

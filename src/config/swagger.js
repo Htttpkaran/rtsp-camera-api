@@ -7,12 +7,8 @@ export const swaggerDocument = {
   },
   servers: [
     {
-      url: '/api',
-      description: 'Main API'
-    },
-    {
       url: '/',
-      description: 'Root'
+      description: 'API Server'
     }
   ],
   paths: {
@@ -38,10 +34,10 @@ export const swaggerDocument = {
         }
       }
     },
-    '/cameras': {
+    '/api/cameras': {
       post: {
-        summary: 'Create Camera',
-        description: 'Dynamically configures a new RTSP camera path in MediaMTX',
+        summary: 'Create / Update Camera (Upsert)',
+        description: 'Creates a new camera path in MediaMTX, or updates the RTSP URL if the camera already exists',
         requestBody: {
           required: true,
           content: {
@@ -58,8 +54,31 @@ export const swaggerDocument = {
           }
         },
         responses: {
+          200: {
+            description: 'Camera Updated Successfully (already existed)',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    camera: {
+                      type: 'object',
+                      properties: {
+                        cameraName: { type: 'string', example: 'Lane-01' },
+                        rtspUrl: { type: 'string', example: 'rtsp://admin:password@192.168.1.100:554/stream' },
+                        webrtc: { type: 'string', example: 'http://localhost:8889/Lane-01' },
+                        hls: { type: 'string', example: 'http://localhost:8888/Lane-01/index.m3u8' },
+                        rtsp: { type: 'string', example: 'rtsp://localhost:8554/Lane-01' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           201: {
-            description: 'Camera Created Successfully',
+            description: 'Camera Created Successfully (new)',
             content: {
               'application/json': {
                 schema: {
@@ -90,20 +109,6 @@ export const swaggerDocument = {
                   properties: {
                     success: { type: 'boolean', example: false },
                     message: { type: 'string', example: 'Validation failed' }
-                  }
-                }
-              }
-            }
-          },
-          409: {
-            description: 'Camera Already Exists',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: false },
-                    message: { type: 'string', example: 'Camera already exists' }
                   }
                 }
               }
@@ -158,7 +163,7 @@ export const swaggerDocument = {
         }
       }
     },
-    '/cameras/{cameraName}': {
+    '/api/cameras/{cameraName}': {
       get: {
         summary: 'Get Single Camera',
         description: 'Retrieves the configuration of a specific camera path',
@@ -211,72 +216,7 @@ export const swaggerDocument = {
           }
         }
       },
-      put: {
-        summary: 'Update Camera',
-        description: 'Updates the source URL for an existing camera',
-        parameters: [
-          {
-            name: 'cameraName',
-            in: 'path',
-            required: true,
-            schema: { type: 'string' },
-            example: 'Lane-01'
-          }
-        ],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['rtspUrl'],
-                properties: {
-                  rtspUrl: { type: 'string', example: 'rtsp://admin:password@192.168.1.200:554/stream' }
-                }
-              }
-            }
-          }
-        },
-        responses: {
-          200: {
-            description: 'Camera Updated Successfully',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: true },
-                    camera: {
-                      type: 'object',
-                      properties: {
-                        cameraName: { type: 'string', example: 'Lane-01' },
-                        rtspUrl: { type: 'string', example: 'rtsp://admin:password@192.168.1.200:554/stream' },
-                        webrtc: { type: 'string', example: 'http://localhost:8889/Lane-01' },
-                        hls: { type: 'string', example: 'http://localhost:8888/Lane-01/index.m3u8' },
-                        rtsp: { type: 'string', example: 'rtsp://localhost:8554/Lane-01' }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          404: {
-            description: 'Camera Not Found',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: false },
-                    message: { type: 'string', example: 'Camera not found' }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
+
       delete: {
         summary: 'Delete Camera',
         description: 'Removes the path configuration from MediaMTX',
@@ -320,7 +260,7 @@ export const swaggerDocument = {
         }
       }
     },
-    '/cameras/{cameraName}/status': {
+    '/api/cameras/{cameraName}/status': {
       get: {
         summary: 'Get Camera Status',
         description: 'Retrieves active telemetry data for a specific camera stream',

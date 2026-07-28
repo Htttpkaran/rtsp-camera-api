@@ -16,15 +16,6 @@ export const cameraBodySchema = Joi.object({
       'any.required': 'rtspUrl is required.'
     })
 });
-
-export const cameraUpdateBodySchema = Joi.object({
-  rtspUrl: Joi.string()
-    .required()
-    .messages({
-      'any.required': 'rtspUrl is required.'
-    })
-});
-
 export const cameraNameParamSchema = Joi.object({
   cameraName: Joi.string()
     .max(50)
