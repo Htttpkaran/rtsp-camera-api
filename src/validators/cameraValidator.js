@@ -1,8 +1,5 @@
 import Joi from 'joi';
 
-// Regex for validating RTSP URLs: rtsp://[user:pass@]host[:port][/path]
-const rtspRegex = /^rtsp:\/\/(?:[^:]+:[^@]+@)?[a-zA-Z0-9.-]+(?::[0-9]+)?(?:\/.*)?$/;
-
 export const cameraBodySchema = Joi.object({
   cameraName: Joi.string()
     .max(50)
@@ -14,20 +11,16 @@ export const cameraBodySchema = Joi.object({
       'any.required': 'cameraName is required.'
     }),
   rtspUrl: Joi.string()
-    .pattern(rtspRegex)
     .required()
     .messages({
-      'string.pattern.base': 'rtspUrl must be a valid RTSP URL starting with rtsp://.',
       'any.required': 'rtspUrl is required.'
     })
 });
 
 export const cameraUpdateBodySchema = Joi.object({
   rtspUrl: Joi.string()
-    .pattern(rtspRegex)
     .required()
     .messages({
-      'string.pattern.base': 'rtspUrl must be a valid RTSP URL starting with rtsp://.',
       'any.required': 'rtspUrl is required.'
     })
 });
